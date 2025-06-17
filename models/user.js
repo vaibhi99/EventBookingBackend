@@ -33,6 +33,14 @@ const userSchema = new mongoose.Schema({
         type:String, 
         required: true,
         enum:["Attendee","Organiser"]
+    },
+
+    resetPasswordToken:{
+        type:String
+    },
+
+    resetPasswordExpiry:{
+        type: Date
     }
 })
 
