@@ -41,6 +41,11 @@ const userSchema = new mongoose.Schema({
 
     resetPasswordExpiry:{
         type: Date
+    },
+
+    blocked:{
+        type:Boolean,
+        default:false
     }
 })
 

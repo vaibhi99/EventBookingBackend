@@ -39,7 +39,7 @@ exports.isAttendee = async (req, res, next) => {
     try{
         const role = req.decoded.role;
 
-        if(role !== "Attendee"){
+        if(role !=="Admin" || role !== "Attendee"){
             return res.status(401).json({
                 success: false,
                 message:"You are not Permitted Attendee Section!!"
@@ -60,7 +60,7 @@ exports.isOrganiser = async (req, res, next) => {
     try{
         const role = req.decoded.role;
 
-        if(role !== "Organiser"){
+        if(role!=="Admin" || role !== "Organiser"){
             return res.status(401).json({
                 success: false,
                 message:"You are not Permitted Organiser Section !!"

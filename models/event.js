@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const category = require("./category");
 
 const eventSchema = new mongoose.Schema({
     name:{
@@ -8,7 +9,8 @@ const eventSchema = new mongoose.Schema({
     
     organiser:{
         type: mongoose.Schema.Types.ObjectId,
-        ref:"User"
+        ref:"User",
+        required: true
     },
 
     attendees:[{
@@ -23,11 +25,6 @@ const eventSchema = new mongoose.Schema({
 
     venue:{
         type:String,
-        required: true
-    },
-
-    zip:{
-        type:Number,
         required: true
     },
 
@@ -65,12 +62,27 @@ const eventSchema = new mongoose.Schema({
     },
 
     category:{
-        type:String,
-        required: true,
-        enum:["Sports","Concerts","Workshops","Conferences"]
+        type: mongoose.Schema.Types.ObjectId,
+        ref:"Category"
+    },
+    
+    attendessCount:{
+        type:Number,
+        default:0
+    },
+
+    avgRated:{
+        type:Number,
+        default:0
+    },
+
+    totalRatings:{
+        type:Number,
+        default:0
     }
 })
 
-eventSchema.index({ location: '2dsphere' });
+eventSchema.index({ location: '2dsphere' , attendessCount:-1, category:1, date:1});
+
 
 module.exports= mongoose.model("Event", eventSchema);
