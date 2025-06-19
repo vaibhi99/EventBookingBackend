@@ -39,7 +39,7 @@ exports.isAttendee = async (req, res, next) => {
     try{
         const role = req.decoded.role;
 
-        if(role !=="Admin" || role !== "Attendee"){
+        if(role !== "Attendee"){
             return res.status(401).json({
                 success: false,
                 message:"You are not Permitted Attendee Section!!"
@@ -60,7 +60,7 @@ exports.isOrganiser = async (req, res, next) => {
     try{
         const role = req.decoded.role;
 
-        if(role!=="Admin" || role !== "Organiser"){
+        if(role !== "Organiser"){
             return res.status(401).json({
                 success: false,
                 message:"You are not Permitted Organiser Section !!"
@@ -73,6 +73,28 @@ exports.isOrganiser = async (req, res, next) => {
         res.status(500).json({
             success: false,
             message:"Something went wrong while authorizing Organiser"
+        })
+    }
+}
+
+
+exports.isAmidn = async (req, res, next) => {
+    try{
+        const role = req.decoded.role;
+
+        if(role!=="Admin" ){
+            return res.status(401).json({
+                success: false,
+                message:"You are not Permitted Admin Section !!"
+            })
+        }
+
+        next();
+
+    } catch(err){
+        res.status(500).json({
+            success: false,
+            message:"Something went wrong while authorizing Admin"
         })
     }
 }

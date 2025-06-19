@@ -154,12 +154,12 @@ exports.login = async (req, res) =>{
         }
 
         const token = jwt.sign(payload, process.env.SECRET_KEY, {
-            expiresIn:"1h"
+            expiresIn:"2h"
         })
 
         res.status(200).cookie("token", token, 
             {
-                expires: new Date(Date.now() + 10*60*1000),
+                expires: new Date(Date.now() + 60*60*1000),
                 httpOnly: true
             }
         ).json({
