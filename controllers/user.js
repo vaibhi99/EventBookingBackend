@@ -1,5 +1,39 @@
 const User =require("../models/user");
 
+//get all users
+exports.getUser = async (req, res) =>{
+    try{
+        const user_id = req.decoded.userid;
+
+        if(!user_id){
+            return res.status(401).json({
+                success: false,
+                message:"No user id not found in token"
+            })
+        }
+
+        const response = await User.findById(user_id);
+
+        if(!user){
+            return res.status(401).json({
+                success: true,
+                message:"User not found"
+            })
+        }
+
+        res.status(200).json({
+            success: true,
+            message:"User Fetched ",
+            response
+        })
+    } catch(err){
+        res.status(500).json({
+            success: false,
+            message:"Internal error in fetching user " +err
+        })
+    }
+}
+
 
 //get all Attendees
 exports.getAttendees = async (req, res) =>{

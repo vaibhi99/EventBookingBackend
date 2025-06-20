@@ -29,7 +29,8 @@ route.get("/category", getAllCategories);
 
 
 //user
-const {getAttendees, getOrganisers, blockUser, unblockUser} = require("../controllers/user");
+const {getUser, getAttendees, getOrganisers, blockUser, unblockUser} = require("../controllers/user");
+route.get("/user",AuthN, getUser);
 route.get("/user/attendee", AuthN, isAdmin, getAttendees);
 route.get("/user/organiser", AuthN, isAdmin, getOrganisers);
 route.post("/user/block", AuthN, isAdmin, blockUser);
