@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const event = require("./event");
 
 const userSchema = new mongoose.Schema({
     firstName:{
@@ -48,5 +49,7 @@ const userSchema = new mongoose.Schema({
         default:false
     }
 })
+
+userSchema.index({role:1});
 
 module.exports= mongoose.model("User",userSchema);

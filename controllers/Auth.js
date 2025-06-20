@@ -94,7 +94,23 @@ exports.signup = async (req, res) =>{
 
         response.password = undefined;
 
-        res.status(200).json({
+        //Create token and log in the user 
+        const payload={
+            role: user.role,
+            userid: user._id,
+            email: email
+        }
+
+        const token = jwt.sign(payload, process.env.SECRET_KEY, {
+            expiresIn:"2h"
+        })
+
+        res.status(200).cookie("token", token, 
+            {
+                expires: new Date(Date.now() + 24*60*60*1000),
+                httpOnly: true
+            }
+        ).json({
             success: true,
             message:"User Created Successfully ",
             response

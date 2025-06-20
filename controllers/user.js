@@ -20,7 +20,7 @@ exports.getAttendees = async (req, res) =>{
 
 
 //get all Organisers
-exports.getAttendees = async (req, res) =>{
+exports.getOrganisers = async (req, res) =>{
     try{
         const response = await User.find({role: "Organiser"})
 

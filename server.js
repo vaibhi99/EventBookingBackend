@@ -3,11 +3,23 @@ const app = express();
 const routes = require("./routes/route");
 const cookieParser = require("cookie-parser");
 const fileUpload = require("express-fileupload");
+const http = require("http");
+
+const cors = require("cors");
+const setupSocket = require("./socket");
+const server = http.createServer(app);
+
 
 require("dotenv").config();
 
 //initialise port
 const PORT = process.env.PORT || 4000;
+
+app.use(cors({
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST"],
+    credentials: true
+}));
 
 //middlewares
 app.use(express.json());
@@ -20,7 +32,9 @@ app.use(fileUpload({
 // mounting
 app.use("/eventbookingweb", routes);
 
-app.listen(PORT, () => {
+setupSocket(server);    
+
+server.listen(PORT, () => {
     console.log(`Server is listening at ${PORT}`)
 });
 
