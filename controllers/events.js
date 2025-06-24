@@ -302,3 +302,37 @@ exports.userEventsDashboard = async (req, res) =>{
         })
     }
 }
+
+
+exports.getEventById = async (req, res) =>{
+    try{
+        const {eventid} = req.body;
+
+        if(!eventid){
+            return res.status(401).json({
+                success: false,
+                message:"No evend id found in body"
+            })
+        }
+
+        const response = await Event.findById(eventid);
+
+        if(!response){
+            return res.status(401).json({
+                success: false,
+                message:"No event found with such id"
+            })
+        }
+
+        res.status(200).json({
+            success: true,
+            message:"Event fetched",
+            response
+        })
+    } catch(err){
+        res.status(500).json({
+            success: false,
+            message:"Internal error in fetching event by id"
+        })
+    }
+}
