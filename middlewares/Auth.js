@@ -78,7 +78,7 @@ exports.isOrganiser = async (req, res, next) => {
 }
 
 
-exports.isAmidn = async (req, res, next) => {
+exports.isAdmin = async (req, res, next) => {
     try{
         const role = req.decoded.role;
 

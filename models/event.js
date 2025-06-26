@@ -66,20 +66,10 @@ const eventSchema = new mongoose.Schema({
         ref:"Category"
     },
     
-    attendessCount:{
+    attendeesCount:{
         type:Number,
         default:0
     },
-
-    avgRated:{
-        type:Number,
-        default:0
-    },
-
-    totalRatings:{
-        type:Number,
-        default:0
-    }
 })
 
 eventSchema.index({ location: '2dsphere' , attendessCount:-1, category:1, date:1});

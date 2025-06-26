@@ -1,7 +1,7 @@
 const express = require("express");
 const route = express.Router();
 
-const {AuthN, isAttendee, isOrganiser} = require("../middlewares/Auth");
+const {AuthN, isAttendee, isOrganiser, isAdmin} = require("../middlewares/Auth");
 const {checkBlocked} = require("../middlewares/checkBlocked");
 
 //Auth
@@ -12,7 +12,7 @@ route.get("/login", login);
 
 
 //Events
-const {createEvent, allEvents, nearbyEvents, categoryEvents, topSellingEvents, organiserEventsDashboard, userEventsDashboard} = require("../controllers/events");
+const {createEvent, allEvents, nearbyEvents, categoryEvents, topSellingEvents, organiserEventsDashboard, userEventsDashboard, getEventById} = require("../controllers/events");
 route.post("/event/create", AuthN, isOrganiser, checkBlocked, createEvent);
 route.get("/event", allEvents);
 route.get("/event/nearby", nearbyEvents);
@@ -20,6 +20,7 @@ route.get("/event/category", categoryEvents);
 route.get("/event/topselling", topSellingEvents);
 route.get("/event/organiserDashboard", AuthN, isOrganiser, organiserEventsDashboard);
 route.get("/event/attendeeDashboard", AuthN, isAttendee, userEventsDashboard);
+route.get("/eventById", getEventById);
 
 
 //Category
