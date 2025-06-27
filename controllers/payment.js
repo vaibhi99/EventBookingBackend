@@ -1,9 +1,9 @@
 const {instance} = require("../config/razorpay");
 const Event = require("../models/event");
 const User = require("../models/user");
-const Payment = require("../models/payment");
+const {sendmail} = require("../utils/mailsender");
 
-const createOrder = async (req, res) =>{
+exports.createOrder = async (req, res) =>{
     try{
         const {eventid} = req.body;
 
@@ -72,38 +72,75 @@ const createOrder = async (req, res) =>{
 
 exports.verifypayment = async (req, res) =>{
     try{
-        const {razorpay_order_id, razorpay_payment_id, razorpay_signature} = req.body;
-
-        const {userid, eventid} = req.body.payload.payment.entity.notes;
-
-        if(!razorpay_order_id || !razorpay_payment_id || !razorpay_signature){
-            return res.status(401).json({
-                success: false,
-                message:"Enter all the details"
-            })
-        }
-
-
-        const payment = await Payment.find({orderid: razorpay_order_id, user: userid});
-
-        if(!payment){
-            res.status(401).json({
-                success: false,
-                message:"Invalid order"
-            })
-        }
+        const signature = req.headers["x-razorpay-signature"];
 
         //verify
-        const expectedSignature = crypto.createHmac("sha256", RAZORPAY_SECRET)
-        .update(razorpay_order_id + "|" + razorpay_payment_id)
+        const expectedSignature = crypto.createHmac("sha256", process.env.RZ_WEBHOOK)
+        .update(JSON.stringify(req.body))
         .digest("hex");
 
         if(expectedSignature === razorpay_signature){
+            console.log("Payment is Verfied !");
 
+            try{
+                const {userid, eventid} = req.body.payload.payment.entity.notes;
+
+                if(!userid || !eventid){
+                    return res.status(401).json({
+                        success: false,
+                        message:"Userid or eventid is not provided"
+                    })
+                }
+
+                const event = await Event.findById(eventid);
+
+                if(!event){
+                    return res.status(401).json({
+                        success: false,
+                        message:"No event found"
+                    })         
+                }
+
+                await event.updateOne({$push:{attendees: userid}});
+
+
+                const user = await User.findById(userid);
+
+                if(!user){
+                    return res.status(401).json({
+                        success: false,
+                        message:"No user found"
+                    })         
+                }
+
+                await user.updateOne({$push:{eventsEnrolled: eventid}});
+
+                const mailbody=`You have successfully enrolled in ${event.name} scheduled on ${event.date}`;
+
+                const response = await sendmail(user.email, "Payment Successfull", mailbody);
+
+            } catch(err){
+                res.status(500).json({
+                    success:false,
+                    message:"Internal error after payment verifcation "+err
+                })
+            }
         }else{
-
+            return res.status(401).json({
+                success: false,
+                message:"Payment is Not verified"
+            })
         }
-    } catch(err){
 
+
+        res.status(200).json({
+            success: true,
+            message:"Payment Verified and user enrolled successfully"
+        })
+    } catch(err){
+        res.status(500).json({
+            success: false,
+            message:"Interanl error in payment verification "+err
+        })
     }
 }

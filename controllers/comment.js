@@ -94,16 +94,10 @@ const Event = require("../models/event");
 
 async function saveComment(data){
     try{
-        const {eventId, comment} = data;
+        const {eventId, text, senderId, firstName} = data;
 
-        if(!eventId || !comment){
+        if(!eventId || !text || !senderId ){
             throw new error("All required fields are not provied");
-        }
-
-        const user_id = req.decoded.userid;
-
-        if(!user_id){
-            throw new error("User Id not found in token");
         }
 
         const event = await Event.findById(eventId);
@@ -114,7 +108,8 @@ async function saveComment(data){
 
         const savedComment = await Comment.create({
             user:user_id,
-            comment: comment,
+            comment: text,
+            firstName:firstName,
             event: eventId
         });
 

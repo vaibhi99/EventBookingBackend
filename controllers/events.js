@@ -203,7 +203,7 @@ exports.topSellingEvents = async (req, res) =>{
         const response = await Event.find().sort({attendeesCount:-1}).limit(5);
 
         res.status(200).json({
-            success: false,
+            success: true,
             message:"Top 5 selling events fetched",
             response
         })
@@ -232,7 +232,7 @@ exports.allUpcomingEvents = async (req, res) =>{
         })
     } catch(err){
         res.status(500).json({
-            succeSS: false,
+            success: false,
             message:"Internal error occured while fetching upcoming events"
         })
     }

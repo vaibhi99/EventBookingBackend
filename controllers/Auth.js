@@ -96,8 +96,8 @@ exports.signup = async (req, res) =>{
 
         //Create token and log in the user 
         const payload={
-            role: user.role,
-            userid: user._id,
+            role: response.role,
+            userid: response._id,
             email: email
         }
 

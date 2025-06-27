@@ -12,7 +12,7 @@ route.get("/login", login);
 
 
 //Events
-const {createEvent, allEvents, nearbyEvents, categoryEvents, topSellingEvents, organiserEventsDashboard, userEventsDashboard, getEventById} = require("../controllers/events");
+const {createEvent, allEvents, nearbyEvents, categoryEvents, topSellingEvents, organiserEventsDashboard, userEventsDashboard, getEventById, allUpcomingEvents} = require("../controllers/events");
 route.post("/event/create", AuthN, isOrganiser, checkBlocked, createEvent);
 route.get("/event", allEvents);
 route.get("/event/nearby", nearbyEvents);
@@ -21,7 +21,7 @@ route.get("/event/topselling", topSellingEvents);
 route.get("/event/organiserDashboard", AuthN, isOrganiser, organiserEventsDashboard);
 route.get("/event/attendeeDashboard", AuthN, isAttendee, userEventsDashboard);
 route.get("/eventById", getEventById);
-
+route.get("/event/upcoming", allUpcomingEvents);
 
 //Category
 const {createCategory, getAllCategories} = require("../controllers/category");
@@ -54,5 +54,11 @@ route.post("/resetpassword/:token", resetPassword);
 const {getEventComments, deleteComment} = require("../controllers/comment");
 route.get("/eventComment", getEventComments);
 route.post("/comment/delete", AuthN, isAttendee, deleteComment);
+
+
+//Payments
+const {createOrder, verifypayment} = require("../controllers/payment");
+route.get("/payment", createOrder);
+route.post("/payment/verify", verifypayment);
 
 module.exports = route;
