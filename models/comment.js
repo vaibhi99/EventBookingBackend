@@ -2,10 +2,6 @@ const mongoose=  require("mongoose");
 const user = require("./user");
 
 const commentSchema = new mongoose.Schema({
-    user:{
-        type: mongoose.Schema.Types.ObjectId,
-        ref:"User"
-    },
     senderId:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"User"
