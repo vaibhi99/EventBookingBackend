@@ -91,123 +91,130 @@ const Event = require("../models/event");
 //     }
 // }
 
+const saveComment = async (data) => {
+  const { comment, time, firstName, email, senderId, eventId } = data;
 
-async function saveComment(data){
-    try{
-        const {eventId, text, senderId, firstName} = data;
+  const newComment = await Comment.create({
+    comment,
+    time,
+    firstName,
+    email,
+    senderId,
+    event: eventId
+  });
 
-        if(!eventId || !text || !senderId ){
-            throw new error("All required fields are not provied");
-        }
+  // Push comment to Event model
+  await Event.findByIdAndUpdate(eventId, {
+    $push: { comments: newComment._id }
+  });
 
-        const event = await Event.findById(eventId);
-
-        if(!event){
-            throw new error("No event found");
-        }
-
-        const savedComment = await Comment.create({
-            user:user_id,
-            comment: text,
-            firstName:firstName,
-            event: eventId
-        });
-
-        await event.updateOne({$push: {comments: savedComment._id}});
-    } catch(err){
-        console.log("Error in saving the comment ");
-        console.error(err);
-    }
-}
+  return newComment;
+};
 
 
-// get all Comments of an event (newest -> oldest)
-const getEventComments = async (req, res) =>{
-    try{
-        const {eventId} = req.body;
+// Get all comments for an event (newest first)
+const getEventComments = async (req, res) => {
+    try {
+        const { eventId } = req.body;
 
-        if(!eventId){
-            return res.status(401).json({
+        if (!eventId) {
+            return res.status(400).json({
                 success: false,
-                message:"Provide an eventId"
-            })
+                message: "Provide an eventId",
+            });
         }
 
         const event = await Event.findById(eventId).populate({
-            path:"comments",
-            options:{
-                sort: {date:-1}
+            path: "comments",
+            options: {
+                sort: { time: -1 } 
             }
         });
 
-        const response = event.comments;
+        if (!event) {
+            return res.status(404).json({
+                success: false,
+                message: "Event not found"
+            });
+        }
 
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
-            message:"Comment fetched",
-            response
-        })
-    } catch(err){
-        res.status(500).json({
+            message: "Comments fetched",
+            response: event.comments,
+        });
+    } catch (err) {
+        console.error("Error fetching comments:", err.message);
+        return res.status(500).json({
             success: false,
-            message:"Internal error in fetching comments"
-        })
+            message: "Internal error in fetching comments"
+        });
     }
-}
+};
 
-
-//delete a comment
-const deleteComment = async (req, res) =>{
-    try{
-        const {commentId, eventId} = req.body;
+// Delete a comment
+const deleteComment = async (req, res) => {
+    try {
+        const { commentId, eventId } = req.body;
         const user_id = req.decoded.userid;
 
-        //validation
-        if(!commentId || !eventId){
+        // Validation
+        if (!commentId || !eventId) {
+            return res.status(400).json({
+                success: false,
+                message: "Provide a commentId and eventId"
+            });
+        }
+
+        if (!user_id) {
             return res.status(401).json({
                 success: false,
-                message:"provide a comment Id and eventId"
-            })
+                message: "No user ID found in token"
+            });
         }
 
-        if(!user_id){
-            return res.status(401).json({
+        const comment = await Comment.findById(commentId);
+        if (!comment) {
+            return res.status(404).json({
                 success: false,
-                message:"No user id found in token"
-            })
+                message: "Comment not found"
+            });
         }
 
-        const comment = await Comment.findById;
-        
-        if(comment.user.toString() !== user_id){
-            return res.status(401).json({
-                success:false,
-                message:"You can't delete other's comment"
-            })
-        }
-
-        const event = await Event.findByIdAndUpdate({eventId},{$pull :{comments: commentId}},{new:true});
-
-        if(!event){
-            return res.status(401).json({
+        if (comment.user.toString() !== user_id) {
+            return res.status(403).json({
                 success: false,
-                message:"No event found with such id"
-            })
+                message: "You can't delete someone else's comment"
+            });
         }
 
-        const response = await Comment.findByIdAndDelete(commentId);
+        const event = await Event.findByIdAndUpdate(
+            eventId,
+            { $pull: { comments: commentId } },
+            { new: true }
+        );
 
-        res.status(200).json({
+        if (!event) {
+            return res.status(404).json({
+                success: false,
+                message: "No event found with such ID"
+            });
+        }
+
+        await Comment.findByIdAndDelete(commentId);
+
+        return res.status(200).json({
             success: true,
-            message:"Comment Deleted !"
-        })
+            message: "Comment deleted!"
+        });
 
-    } catch(err) {
-        res.status(500).json({
+    } catch (err) {
+        console.error("Delete comment error:", err.message);
+        return res.status(500).json({
             success: false,
-            message:"There was some Internal error while deleting the comment"
-        })
+            message: "There was an internal error while deleting the comment"
+        });
     }
-}
+};
 
-module.exports = {saveComment, getEventComments, deleteComment};
+module.exports = { saveComment, getEventComments, deleteComment };

@@ -1,32 +1,28 @@
 const { Server } = require("socket.io");
-const cors = require("cors");
-const {saveComment} = require("./models/comment");
+const { saveComment } = require("./controllers/comment");
 
+function setupSocket(server) {
+    const io = new Server(server, {
+        cors: {
+            origin: "http://localhost:3000",
+            methods: ["GET", "POST"]
+        }
+    });
 
-function setupSocket(server){
-    const io = new Server(server,{        
-        cors:{
-            origin:"http://localhost:3000",
-            method:["GET","POST"]
-        }}
-    )
-
-    io.on("connection", (socket) =>{
-        console.log("User connected", socket.id);
+    io.on("connection", (socket) => {
+        console.log("User connected:", socket.id);
 
         socket.on("new-comment", async (data) => {
-            try{
+            try {
                 const comment = await saveComment(data);
-            } catch(err){
-                console.log("Error in saving comments (maybe some data is missing) ");
-                console.error(err);
+                socket.broadcast.emit(`receive-comment:${data.eventId}`, comment);
+            } catch (err) {
+                console.error("Error in handling new-comment:", err.message);
             }
-
-            io.emit(`receive-comment:${data.eventId}`, comment);
         });
 
-        socket.on("disconnect", () =>{
-            console.log("User disconnected", socket.id)
+        socket.on("disconnect", () => {
+            console.log("User disconnected:", socket.id);
         });
     });
 

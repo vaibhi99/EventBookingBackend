@@ -6,6 +6,10 @@ const commentSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref:"User"
     },
+    senderId:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"User"
+    },
 
     firstName:{
         type:String,
@@ -23,9 +27,9 @@ const commentSchema = new mongoose.Schema({
         ref:"Event"
     },
 
-    date:{
+    time:{
         type: Date,
-        default: Date.now()
+        default: Date.now
     }
 })
 
