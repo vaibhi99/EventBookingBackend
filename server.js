@@ -3,8 +3,10 @@ const app = express();
 const routes = require("./routes/route");
 const cookieParser = require("cookie-parser");
 const fileUpload = require("express-fileupload");
+
 const http = require("http");
 
+const startNgrok = require("./config/ngrok");
 const cors = require("cors");
 const setupSocket = require("./socket");
 const server = http.createServer(app);
@@ -36,7 +38,8 @@ app.use("/eventbookingweb", routes);
 setupSocket(server);    
 
 server.listen(PORT, () => {
-    console.log(`Server is listening at ${PORT}`)
+    console.log(`Server is listening at ${PORT}`);
+    startNgrok(PORT)
 });
 
 const {dbconnect} = require("./config/database");
