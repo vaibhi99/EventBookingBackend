@@ -1,39 +1,27 @@
+
 const jwt = require("jsonwebtoken");
+// Authentication Middleware
+exports.AuthN = async (req, res, next) => {
+  try {
+    const token = req.cookies?.token;
 
-
-exports.AuthN = async (req, res, next) =>{
-    try{
-        const token = req.body.token || req.cookie.token || req.header.authorization.replace("Bearer ","");
-
-        if(!token){
-            return res.status(401).json({
-                success: false,
-                message:"No jwt token found"
-            })
-        }
-
-        //verify the token
-        const result = jwt.verify(token, process.env.SERCRET_KEY);
-
-        //invalid token
-        if(!result){
-            return res.status(401).json({
-                success: false,
-                message:"Invalid token"
-            })
-        }
-
-        req.decoded =result;
-
-        next();
-
-    } catch(err){
-        res.status(500).json({
-            success: false,
-            message:"Something went wrong while verifying the token"
-        })
+      
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: "No JWT token found",
+      });
     }
-}
+    const decoded = jwt.verify(token, process.env.SECRET_KEY);
+    req.decoded = decoded;
+    next();
+  } catch (err) {
+    return res.status(401).json({
+      success: false,
+      message: "Invalid or expired token",
+    });
+  }
+};
 
 exports.isAttendee = async (req, res, next) => {
     try{

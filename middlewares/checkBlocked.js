@@ -1,10 +1,10 @@
 const User = require("../models/user");
 
-exports.checkBlocked = async (req, res) =>{
+exports.checkBlocked = async (req, res,next) =>{
     try{
         const user_id = req.decoded.userid;
 
-        if(!used_id){
+        if(!user_id){
             return res.status(401).json({
                 success: false,
                 message:"No userid in token"
@@ -26,8 +26,8 @@ exports.checkBlocked = async (req, res) =>{
                 message:"User is Banned !"
             })
         }
-
         next();
+
     } catch(err){
         res.status(500).json({
             success: false,

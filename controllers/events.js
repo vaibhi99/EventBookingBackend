@@ -10,8 +10,7 @@ exports.createEvent = async (req, res) =>{
         const user_id = req.decoded.userid;
 
         const {name, date, venue, price, description, categoryName} = req.body;
-
-        const thumbnail = req.files.image;
+        const thumbnail = req.files?.image;
 
         //validation
         if(!user_id){
@@ -45,15 +44,19 @@ exports.createEvent = async (req, res) =>{
             })
         }
 
-        //check if valid category is selected
-        const category =await Category.findOne({category: categoryName});
+        //convert ippercase first letter 
+        const formattedCategoryName = categoryName.charAt(0).toUpperCase() + categoryName.slice(1).toLowerCase();
 
+
+        //check if valid category is selected
+        let category = await Category.findOne({category:formattedCategoryName});
         if(!category){
-            return res.status(401).json({
-                success: false,
-                message: "No such category found"
-            })
+            category = await Category.create({
+            category: formattedCategoryName,
+            events: []
+        });
         }
+
 
         //upload the thumbail and get secure url
         const imageUploaded = await uploadImage(thumbnail, "EventBookingWeb");
@@ -76,6 +79,7 @@ exports.createEvent = async (req, res) =>{
             date: date,
             venue: venue,
             price: price,
+            organiser:user_id,
             description: description,
             category: category._id,
             image: imageUploaded.secure_url,
@@ -91,8 +95,7 @@ exports.createEvent = async (req, res) =>{
         res.status(200).json({
             success: true,
             message:"Event created Successfully",
-            lat,
-            lng
+            response
         })
     } catch(err){
         res.status(500).json({
@@ -123,56 +126,59 @@ exports.allEvents = async (req, res) =>{
 
 
 //get nearby events
-exports.nearbyEvents = async (req, res) =>{
-    try{
-        const {userLat, userLng} = req.body;
+exports.nearbyEvents = async (req, res) => {
+  try {
+    const { userLat, userLng } = req.body;
+    console.log(userLat,userLng)
 
-        //validation
-        if(!userLat || !userLng){
-            return res.status(401).json({
-                success: false,
-                message:"User's coordinates not found"
-            })
-        }
-
-        const response = await Event.find({
-            location: {
-                $near: {
-                $geometry: {
-                    type: "Point",
-                    coordinates: [userLat, userLng]
-                },
-                $maxDistance: 10 * 1000 // in meters
-                }
-            }
-        });
-
-        if(!response){
-            return res.status(401).json({
-                success: false,
-                message:"No events nearby"
-            })
-        }
-
-        res.status(200).json({
-            success: true,
-            message:"Events found",
-            response
-        })
-
-    } catch(err){
-        res.status(500).json({
-            success: false,
-            message:"Internal error occured while finding nearby"
-        })
+    if (!userLat || !userLng) {
+      return res.status(400).json({
+        success: false,
+        message: "User's coordinates not found",
+      });
     }
-}
+
+    const events = await Event.find({
+      location: {
+        $near: {
+          $geometry: {
+            type: "Point",
+            coordinates: [userLng, userLat],
+          },
+          $maxDistance: 500 * 1000, // 100 km
+        },
+      },
+    });
+    console.log(events)
+
+    if (!events.length) {
+      return res.status(404).json({
+        success: false,
+        message: "No events nearby",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Events found",
+      events,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      message: "Internal error occurred while finding nearby events",
+    });
+  }
+};
+
 
 
 // get events by category
 exports.categoryEvents = async (req, res) =>{
     try{
         const {category} =req.body;
+        console.log(category)
 
         if(!category){
             return res.status(401).json({
@@ -181,8 +187,12 @@ exports.categoryEvents = async (req, res) =>{
             })
         }
 
-        const response = await Event.find({category: category});
+        const category_id = await Category.findOne({category:category});
+        const id = category_id._id;
+        console.log(id)
 
+        const response = await Event.find({category: id});
+        console.log(response)
         res.status(200).json({
             success: true,
             message:"Events filtered by category",
@@ -251,8 +261,9 @@ exports.organiserEventsDashboard = async (req, res) =>{
             })
         }
 
+        console.log("hi")
         const response = await Event.find({organiser: user_id}).sort({date:1});
-
+        console.log("hi",response)
         res.status(200).json({
             success: true,
             message:"All Organiser's events",
@@ -260,7 +271,7 @@ exports.organiserEventsDashboard = async (req, res) =>{
         })
     } catch(err){
         res.status(500).json({
-            succeSS: false,
+            success: false,
             message:"Internal error occured while fetching upcoming events"
         })
     }

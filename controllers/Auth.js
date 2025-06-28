@@ -73,8 +73,8 @@ exports.signup = async (req, res) =>{
                 message:"No otp found for this email"
             })
         }
-
-        if(actualOTP[0].otp !== otp){
+        console.log(actualOTP[0].otp,parseInt(otp));
+        if(actualOTP[0].otp !== parseInt(otp)){
             return res.status(401).json({
                 success: false,
                 message:"Wrong OTP"
@@ -127,10 +127,10 @@ exports.signup = async (req, res) =>{
 //Login
 exports.login = async (req, res) =>{
     try{
-        const {email, password, role} = req.body;
+        const {email, password} = req.body;
 
         //validation 
-        if(!email || !password || !role){
+        if(!email || !password){
             return res.status(401).json({
                 success: false,
                 message:"Enter all the fields"
@@ -146,13 +146,7 @@ exports.login = async (req, res) =>{
             })
         }
 
-        //check if the role is same
-        if(user.role !== role){
-            return res.status(401).json({
-                success: false,
-                message:"Select correct role"
-            })
-        }
+        
 
         const result = await bcrypt.compare(password, user.password);
 
@@ -172,7 +166,7 @@ exports.login = async (req, res) =>{
         const token = jwt.sign(payload, process.env.SECRET_KEY, {
             expiresIn:"2h"
         })
-
+        console.log(token)
         const response = user;
 
         res.status(200).cookie("token", token, 

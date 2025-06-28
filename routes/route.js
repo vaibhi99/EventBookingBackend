@@ -8,19 +8,19 @@ const {checkBlocked} = require("../middlewares/checkBlocked");
 const {generateOTP, signup, login} = require("../controllers/Auth");
 route.post("/generateotp", generateOTP);
 route.post("/signup", signup);
-route.get("/login", login);
+route.post("/login", login);
 
 
 //Events
 const {createEvent, allEvents, nearbyEvents, categoryEvents, topSellingEvents, organiserEventsDashboard, userEventsDashboard, getEventById, allUpcomingEvents} = require("../controllers/events");
 route.post("/event/create", AuthN, isOrganiser, checkBlocked, createEvent);
 route.get("/event", allEvents);
-route.get("/event/nearby", nearbyEvents);
-route.get("/event/category", categoryEvents);
+route.post("/event/nearby", nearbyEvents);
+route.post("/event/category", categoryEvents);
 route.get("/event/topselling", topSellingEvents);
 route.get("/event/organiserDashboard", AuthN, isOrganiser, organiserEventsDashboard);
 route.get("/event/attendeeDashboard", AuthN, isAttendee, userEventsDashboard);
-route.get("/eventById", getEventById);
+route.post("/eventById", getEventById);
 route.get("/event/upcoming", allUpcomingEvents);
 
 //Category
@@ -46,13 +46,13 @@ route.get("/eventRating", getEventRatings);
 
 //reset password 
 const {resetPasswordLink, resetPassword} =  require("../controllers/resetpassword");
-route.get("/resetpassword", resetPasswordLink);
+route.post("/resetpassword", resetPasswordLink);
 route.post("/resetpassword/:token", resetPassword);
 
 
 //Comments
 const {getEventComments, deleteComment} = require("../controllers/comment");
-route.get("/eventComment", getEventComments);
+route.post("/eventComment", getEventComments);
 route.post("/comment/delete", AuthN, isAttendee, deleteComment);
 
 

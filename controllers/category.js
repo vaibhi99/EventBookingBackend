@@ -32,7 +32,15 @@ exports.createCategory = async (req, res) =>{
 // get all categories
 exports.getAllCategories = async (req, res) =>{
     try{
-        const response = await Category.find();
+       const categories = await Category.find();
+       const categoryName = categories.map((cat) => cat.category);//map return array
+        
+       res.status(200).json({
+         success: true,
+         message: "All categories fetched",
+         response: categoryName
+        });
+
 
         res.status(200).json({
             success: true,

@@ -3,7 +3,7 @@ const User =require("../models/user");
 //get all users
 exports.getUser = async (req, res) =>{
     try{
-        const user_id = req.decoded.userid;
+        const user_id = req.decoded?.userid;
 
         if(!user_id){
             return res.status(401).json({
@@ -12,7 +12,7 @@ exports.getUser = async (req, res) =>{
             })
         }
 
-        const response = await User.findById(user_id);
+        const user = await User.findById(user_id);
 
         if(!user){
             return res.status(401).json({
@@ -21,10 +21,12 @@ exports.getUser = async (req, res) =>{
             })
         }
 
+        console.log(user);
+
         res.status(200).json({
             success: true,
             message:"User Fetched ",
-            response
+            user
         })
     } catch(err){
         res.status(500).json({
