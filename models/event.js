@@ -70,6 +70,11 @@ const eventSchema = new mongoose.Schema({
         type:Number,
         default:0
     },
+
+    seatsAvl:{
+        type: Number,
+        default: 200
+    }
 })
 
 eventSchema.index({ location: '2dsphere' , attendessCount:-1, category:1, date:1});

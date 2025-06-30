@@ -1,3 +1,4 @@
+const { response } = require("express");
 const User =require("../models/user");
 
 //get all users
@@ -49,7 +50,8 @@ exports.getAttendees = async (req, res) =>{
     } catch(err) {
         res.status(500).json({
             success: false,
-            message:"Interanl error occured in fetching attendees"
+            message:"Interanl error occured in fetching attendees",
+            response
         })
     }
 }
@@ -67,7 +69,8 @@ exports.getOrganisers = async (req, res) =>{
     } catch(err) {
         res.status(500).json({
             success: false,
-            message:"Interanl error occured in fetching organiser"
+            message:"Interanl error occured in fetching organiser",
+            response
         })
     }
 }
@@ -142,6 +145,43 @@ exports.unblockUser = async (req, res) =>{
         res.status(500).json({
             success: false,
             message:"Internal error occured while Unblocking user"
+        })
+    }
+}
+
+exports.editProfile = async (req, res) =>{
+    try{
+        const {firstName, lastName, email} = req.body;
+
+        const userid = req.decoded.userid;
+
+        if(!userid){
+            return res.status(401).json({
+                success: false,
+                message:'No user id in token'
+            })
+        }
+
+        const user = await User.findById(userid);
+
+        if(!user){
+            return res.status(401).json({
+                success: false,
+                message:'No user found'
+            })            
+        }
+
+        const response = await user.updateOne({firstName: firstName, lastName: lastName, email: email}, {new: true});
+
+        res.status(200).json({
+            success: true,
+            message:"Profile changed",
+            response
+        })
+    } catch(err){
+        res.status(500).json({
+            success: false,
+            message:"Internal error occured while updating profile " + err
         })
     }
 }

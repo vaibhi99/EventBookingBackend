@@ -6,7 +6,7 @@ const fileUpload = require("express-fileupload");
 
 const http = require("http");
 
-const startNgrok = require("./config/ngrok");
+// const startNgrok = require("./config/ngrok");
 const cors = require("cors");
 const setupSocket = require("./socket");
 const server = http.createServer(app);
@@ -39,7 +39,7 @@ setupSocket(server);
 
 server.listen(PORT, () => {
     console.log(`Server is listening at ${PORT}`);
-    startNgrok(PORT)
+    // startNgrok(PORT)
 });
 
 const {dbconnect} = require("./config/database");

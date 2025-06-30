@@ -2,12 +2,14 @@ const {instance} = require("../config/razorpay");
 const Event = require("../models/event");
 const User = require("../models/user");
 const {sendmail} = require("../utils/mailsender");
+const Ticket = require("../models/ticket");
+const generateTicketQRCode = require("../utils/qrcode");
 
 exports.createOrder = async (req, res) =>{
     try{
         const {eventid} = req.body;
 
-        const userid = req.decoded.user_id;
+        const userid = req.decoded.userid;
 
         if(!eventid){
             return res.status(401).json({
@@ -42,6 +44,13 @@ exports.createOrder = async (req, res) =>{
             })
         }
 
+        if(event.seatsAvl <= 0){
+            return res.status(200).json({
+                success: false,
+                message:"No seats available"
+            })
+        }
+
         const options = {
             amount: 50000,
             currency: "INR",
@@ -58,13 +67,14 @@ exports.createOrder = async (req, res) =>{
 
         res.status(200).json({
             success: true,
-            message:"Order created"
+            message:"Order created",
+            data: response
         })
 
     } catch(err){
         res.status(500).json({
             success: false,
-            message:"Internal error in creating order"
+            message:"Internal error in creating order "+err
         })
     }
 }
@@ -78,6 +88,8 @@ exports.verifypayment = async (req, res) =>{
         const expectedSignature = crypto.createHmac("sha256", process.env.RZ_WEBHOOK)
         .update(JSON.stringify(req.body))
         .digest("hex");
+
+        let qr="";
 
         if(expectedSignature === razorpay_signature){
             console.log("Payment is Verfied !");
@@ -100,10 +112,7 @@ exports.verifypayment = async (req, res) =>{
                         message:"No event found"
                     })         
                 }
-
-                await event.updateOne({$push:{attendees: userid}});
-
-
+                
                 const user = await User.findById(userid);
 
                 if(!user){
@@ -113,11 +122,42 @@ exports.verifypayment = async (req, res) =>{
                     })         
                 }
 
+                const seatno = event.seatsAvl;
+
+                const ticketData =JSON.stringify({
+                    Name: user.firstName,
+                    Event: event.name,
+                    Seat: seatno,
+                    Venue: event.venue
+                });
+
+                qr = await generateTicketQRCode(ticketData);
+
+                if(qr == null){
+                    return res.status(401).json({
+                        success: false,
+                        message:"Error creating qr"
+                    })
+                }
+
+                await Ticket.create({
+                    user: userid,
+                    price: event.price,
+                    event: eventid,
+                    seatNo: seatno,
+                    QR: qr
+                })
+
+                await event.updateOne({
+                    $push:{attendees: userid},
+                    $set: seatsAvl = seatno-1
+                });
+
                 await user.updateOne({$push:{eventsEnrolled: eventid}});
 
-                const mailbody=`You have successfully enrolled in ${event.name} scheduled on ${event.date}`;
+                const mailbody=`You have successfully enrolled in ${event.name} scheduled on ${event.date}, here is your ticket: ${qr}`;
 
-                const response = await sendmail(user.email, "Payment Successfull", mailbody);
+                await sendmail(user.email, "Payment Successfull", mailbody);
 
             } catch(err){
                 res.status(500).json({

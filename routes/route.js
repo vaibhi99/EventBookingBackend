@@ -30,12 +30,14 @@ route.get("/category", getAllCategories);
 
 
 //user
-const {getUser, getAttendees, getOrganisers, blockUser, unblockUser} = require("../controllers/user");
+const {getUser, getAttendees, getOrganisers, blockUser, unblockUser, editProfile} = require("../controllers/user");
 route.get("/user",AuthN, getUser);
 route.get("/user/attendee", AuthN, isAdmin, getAttendees);
 route.get("/user/organiser", AuthN, isAdmin, getOrganisers);
 route.post("/user/block", AuthN, isAdmin, blockUser);
 route.post("/user/unblock", AuthN, isAdmin, unblockUser);
+route.post("/user/updateProfile", AuthN, editProfile);
+
 
 
 //rating & review
@@ -58,7 +60,7 @@ route.post("/comment/delete", AuthN, isAttendee, deleteComment);
 
 //Payments
 const {createOrder, verifypayment} = require("../controllers/payment");
-route.get("/payment", createOrder);
+route.post("/payment",AuthN, createOrder);
 route.post("/payment/verify", verifypayment);
 
 module.exports = route;

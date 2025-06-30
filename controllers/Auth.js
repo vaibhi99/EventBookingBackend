@@ -9,6 +9,8 @@ require("dotenv").config();
 //generate otp
 exports.generateOTP = async (req, res) => {
     try{
+        console.log("otp started");
+
         const {email} = req.body;
 
         //validation
@@ -100,6 +102,8 @@ exports.signup = async (req, res) =>{
             userid: response._id,
             email: email
         }
+
+        console.log("in");
 
         const token = jwt.sign(payload, process.env.SECRET_KEY, {
             expiresIn:"2h"

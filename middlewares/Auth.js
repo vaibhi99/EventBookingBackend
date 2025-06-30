@@ -1,10 +1,10 @@
 
 const jwt = require("jsonwebtoken");
 // Authentication Middleware
+
 exports.AuthN = async (req, res, next) => {
   try {
-    const token = req.cookies?.token;
-
+    const token = req.cookies.token || req.headers.authorization.replace("Bearer ", "");
       
     if (!token) {
       return res.status(401).json({
@@ -12,6 +12,7 @@ exports.AuthN = async (req, res, next) => {
         message: "No JWT token found",
       });
     }
+
     const decoded = jwt.verify(token, process.env.SECRET_KEY);
     req.decoded = decoded;
     next();
