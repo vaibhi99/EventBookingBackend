@@ -106,7 +106,7 @@ exports.signup = async (req, res) =>{
         console.log("in");
 
         const token = jwt.sign(payload, process.env.SECRET_KEY, {
-            expiresIn:"2h"
+            expiresIn:"10h"
         })
 
         res.status(200).cookie("token", token, 

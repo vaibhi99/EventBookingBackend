@@ -26,7 +26,7 @@ exports.resetPasswordLink = async (req, res) =>{
         
         const token = crypto.randomUUID();
 
-        const url = `http://localhost:3000/eventbookingweb/resetpassword/${token}`;
+        const url = `https://event-booking-self.vercel.app/eventbookingweb/resetpassword/${token}`;
 
         // 10 minutes
         const expiryTime = Date.now() + 10 * 60 *1000;
