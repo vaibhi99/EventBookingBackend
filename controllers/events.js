@@ -86,7 +86,7 @@ exports.createEvent = async (req, res) =>{
 
             location:{
                 type:'Point',
-                coordinates: [lat, lng]
+                coordinates: [lng, lat]
             }
         })
 
