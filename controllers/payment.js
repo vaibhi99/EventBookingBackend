@@ -5,6 +5,8 @@ const {sendmail} = require("../utils/mailsender");
 const Ticket = require("../models/ticket");
 const generateTicketQRCode = require("../utils/qrcode");
 
+let ticketid;
+
 exports.createOrder = async (req, res) =>{
     try{
         const {eventid} = req.body;
@@ -24,7 +26,6 @@ exports.createOrder = async (req, res) =>{
                 message:"No user ID found in token"
             })
         }
-
 
         const event = await Event.findById(eventid);
 
@@ -50,6 +51,50 @@ exports.createOrder = async (req, res) =>{
                 message:"No seats available"
             })
         }
+
+        const user = await User.findById(userid);
+
+            if(!user){
+                return res.status(401).json({
+                    success: false,
+                    message:"No user found"
+                })         
+            }
+
+            const seatno = event.seatsAvl;
+
+            const ticketData =JSON.stringify({
+                Name: user.firstName,
+                Event: event.name,
+                Seat: seatno,
+                Venue: event.venue
+            });
+
+            qr = await generateTicketQRCode(ticketData);
+
+            if(qr == null){
+                return res.status(401).json({
+                    success: false,
+                    message:"Error creating qr"
+                })
+            }
+
+        const ticket = await Ticket.create({
+            user: userid,
+            price: event.price,
+            event: eventid,
+            seatNo: seatno,
+            QR: qr
+        })
+
+        if(!ticket){
+            return res.status(500).json({
+                success: false,
+                message:"No ticket created"
+            })
+        }
+
+        ticketid= ticket._id;
 
         const options = {
             amount: 50000,
@@ -89,9 +134,7 @@ exports.verifypayment = async (req, res) =>{
         .update(JSON.stringify(req.body))
         .digest("hex");
 
-        let qr="";
-
-        if(expectedSignature === razorpay_signature){
+        if(expectedSignature === signature){
             console.log("Payment is Verfied !");
 
             try{
@@ -122,31 +165,8 @@ exports.verifypayment = async (req, res) =>{
                     })         
                 }
 
-                const seatno = event.seatsAvl;
-
-                const ticketData =JSON.stringify({
-                    Name: user.firstName,
-                    Event: event.name,
-                    Seat: seatno,
-                    Venue: event.venue
-                });
-
-                qr = await generateTicketQRCode(ticketData);
-
-                if(qr == null){
-                    return res.status(401).json({
-                        success: false,
-                        message:"Error creating qr"
-                    })
-                }
-
-                await Ticket.create({
-                    user: userid,
-                    price: event.price,
-                    event: eventid,
-                    seatNo: seatno,
-                    QR: qr
-                })
+                const ticket = await Ticket.findByIdAndUpdate({ticketid}, {$set:{noExpiry:true},
+                $set: {seatNo:event.seatsAvl}}, {new: true});
 
                 await event.updateOne({
                     $push:{attendees: userid},
@@ -155,7 +175,7 @@ exports.verifypayment = async (req, res) =>{
 
                 await user.updateOne({$push:{eventsEnrolled: eventid}});
 
-                const mailbody=`You have successfully enrolled in ${event.name} scheduled on ${event.date}, here is your ticket: ${qr}`;
+                const mailbody=`You have successfully enrolled in ${event.name} scheduled on ${event.date}, here is your ticket ${ticket.QR}`;
 
                 await sendmail(user.email, "Payment Successfull", mailbody);
 

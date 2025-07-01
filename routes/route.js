@@ -63,4 +63,8 @@ const {createOrder, verifypayment} = require("../controllers/payment");
 route.post("/payment",AuthN, createOrder);
 route.post("/payment/verify", verifypayment);
 
+//Ticket
+const{getTicket} = require("../controllers/ticket");
+route.get("/ticket", AuthN, getTicket);
+
 module.exports = route;

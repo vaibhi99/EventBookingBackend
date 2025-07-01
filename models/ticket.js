@@ -21,6 +21,12 @@ const ticketSchema = new mongoose.Schema({
         required: true
     },
 
+    createdAt:{
+        type:Date,
+        default: Date.now(),
+        expiry:15*60
+    },
+
     QR:{
         type: String,
     }
