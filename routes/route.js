@@ -65,6 +65,6 @@ route.post("/payment/verify", verifypayment);
 
 //Ticket
 const{getTicket} = require("../controllers/ticket");
-route.get("/ticket", AuthN, getTicket);
+route.post("/ticket", AuthN, getTicket);
 
 module.exports = route;

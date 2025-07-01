@@ -148,7 +148,7 @@ exports.nearbyEvents = async (req, res) => {
           $maxDistance: 500 * 1000, // 100 km
         },
       },
-    });
+    }).populate("category");
     console.log(events)
 
     if (!events.length) {
@@ -262,7 +262,7 @@ exports.organiserEventsDashboard = async (req, res) =>{
         }
 
         console.log("hi")
-        const response = await Event.find({organiser: user_id}).sort({date:1});
+        const response = await Event.find({organiser: user_id}).sort({date:1}).populate('category');
         console.log("hi",response)
         res.status(200).json({
             success: true,
@@ -326,7 +326,7 @@ exports.getEventById = async (req, res) =>{
             })
         }
 
-        const response = await Event.findById(eventid);
+        const response = await Event.findById(eventid).populate('category');
 
         if(!response){
             return res.status(401).json({
