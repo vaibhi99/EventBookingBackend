@@ -18,7 +18,7 @@ require("dotenv").config();
 const PORT = process.env.PORT || 4000;
 
 app.use(cors({
-    origin: "https://event-booking-self.vercel.app/",
+    origin: "https://event-booking-self.vercel.app",
     methods: ["GET", "POST"],
     credentials: true
 }));
