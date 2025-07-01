@@ -20,7 +20,7 @@ exports.getTicket = async (req, res) =>{
             })
         }
 
-        const ticket = await Ticket.find({user: userid, event: eventid});
+        const ticket = await Ticket.findOne({user: userid, event: eventid}).populate('event');
 
         if(!ticket){
             return res.status(401).json({
