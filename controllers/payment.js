@@ -97,7 +97,7 @@ exports.createOrder = async (req, res) =>{
         ticketid= ticket._id;
 
         const options = {
-            amount: 50000,
+            amount: event.price,
             currency: "INR",
             receipt: "testpayment",
 
