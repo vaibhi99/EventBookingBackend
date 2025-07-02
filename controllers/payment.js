@@ -180,7 +180,7 @@ exports.verifypayment = async (req, res) =>{
                 await sendmail(user.email, "Payment Successfull", mailbody);
 
             } catch(err){
-                res.status(500).json({
+                return res.status(500).json({
                     success:false,
                     message:"Internal error after payment verifcation "+err
                 })
