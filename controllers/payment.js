@@ -4,6 +4,7 @@ const User = require("../models/user");
 const {sendmail} = require("../utils/mailsender");
 const Ticket = require("../models/ticket");
 const generateTicketQRCode = require("../utils/qrcode");
+const crypto = require("crypto");
 
 let ticketid;
 
