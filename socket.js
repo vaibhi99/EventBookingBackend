@@ -4,7 +4,7 @@ const { saveComment } = require("./controllers/comment");
 function setupSocket(server) {
     const io = new Server(server, {
         cors: {
-            origin: "http://localhost:3000",
+            origin: "https://event-booking-self.vercel.app",
             methods: ["GET", "POST"]
         }
     });
