@@ -113,7 +113,6 @@ exports.signup = async (req, res) =>{
             {
                 expires: new Date(Date.now() + 24*60*60*1000),
                 httpOnly: true,
-                secure: true,
                 sameSite: 'None'
             }
         ).json({
@@ -179,7 +178,6 @@ exports.login = async (req, res) =>{
             {
                 expires: new Date(Date.now() + 60*60*1000),
                 httpOnly: true,
-                secure: true,
                 sameSite: 'None'
             }
         ).json({
