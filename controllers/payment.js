@@ -108,7 +108,6 @@ exports.createOrder = async (req, res) =>{
         }
 
         const order =  await instance.orders.create(options);
-        console.log(response);
 
         res.status(200).json({
             success: true,
