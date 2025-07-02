@@ -107,13 +107,13 @@ exports.createOrder = async (req, res) =>{
             }
         }
 
-        const response =  await instance.orders.create(options);
+        const order =  await instance.orders.create(options);
         console.log(response);
 
         res.status(200).json({
             success: true,
             message:"Order created",
-            data: response
+            order
         })
 
     } catch(err){
