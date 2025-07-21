@@ -6,8 +6,6 @@ const Ticket = require("../models/ticket");
 const generateTicketQRCode = require("../utils/qrcode");
 const crypto = require("crypto");
 
-let ticketid;
-
 exports.createOrder = async (req, res) =>{
     try{
         const {eventid} = req.body;
@@ -95,8 +93,6 @@ exports.createOrder = async (req, res) =>{
             })
         }
 
-        ticketid= ticket._id;
-
         const options = {
             amount: event.price,
             currency: "INR",
@@ -104,7 +100,8 @@ exports.createOrder = async (req, res) =>{
 
             notes:{
                 userid: userid,
-                eventid: eventid
+                eventid: eventid, 
+                ticketid: ticket._id
             }
         }
 
@@ -138,7 +135,7 @@ exports.verifypayment = async (req, res) =>{
             console.log("Payment is Verfied !");
 
             try{
-                const {userid, eventid} = req.body.payload.payment.entity.notes;
+                const {userid, eventid, ticketid} = req.body.payload.payment.entity.notes;
 
                 if(!userid || !eventid){
                     return res.status(401).json({
