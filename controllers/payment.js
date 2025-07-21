@@ -94,7 +94,7 @@ exports.createOrder = async (req, res) =>{
         }
 
         const options = {
-            amount: event.price,
+            amount: event.price * 100,
             currency: "INR",
             receipt: "testpayment",
 
