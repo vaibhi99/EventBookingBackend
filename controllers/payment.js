@@ -101,7 +101,7 @@ exports.createOrder = async (req, res) =>{
             notes:{
                 userid: userid,
                 eventid: eventid, 
-                ticketid: ticket._id
+                ticketid: ticket._id.toString()
             }
         }
 
