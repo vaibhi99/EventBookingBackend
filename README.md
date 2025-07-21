@@ -1,5 +1,7 @@
 # EventBookingBackend
 
+[Live Website](https://event-booking-self.vercel.app/)
+
 A backend API for event booking, ticketing, payments, and user management.
 
 ## Features
