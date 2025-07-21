@@ -122,86 +122,73 @@ exports.createOrder = async (req, res) =>{
 }
 
 
-exports.verifypayment = async (req, res) =>{
-    try{
+exports.verifypayment = async (req, res) => {
+    try {
         const signature = req.headers["x-razorpay-signature"];
-
-        //verify
         const expectedSignature = crypto.createHmac("sha256", process.env.RZ_WEBHOOK)
-        .update(JSON.stringify(req.body))
-        .digest("hex");
+            .update(JSON.stringify(req.body))
+            .digest("hex");
 
-        if(expectedSignature === signature){
-            console.log("Payment is Verfied !");
-
-            try{
-                const {userid, eventid, ticketid} = req.body.payload.payment.entity.notes;
-
-                if(!userid || !eventid){
-                    return res.status(401).json({
-                        success: false,
-                        message:"Userid or eventid is not provided"
-                    })
-                }
-
-                const event = await Event.findById(eventid);
-
-                if(!event){
-                    return res.status(401).json({
-                        success: false,
-                        message:"No event found"
-                    })         
-                }
-                
-                const user = await User.findById(userid);
-
-                if(!user){
-                    return res.status(401).json({
-                        success: false,
-                        message:"No user found"
-                    })         
-                }
-
-                console.log(user.firstName, event.name);
-                
-                const ticket = await Ticket.findByIdAndUpdate({ticketid}, {$set:{noExpiry:true},
-                $set: {seatNo:event.seatsAvl}}, {new: true});
-
-                console.log(ticket);
-                
-                await event.updateOne({
-                    $push:{attendees: userid},
-                    $set: seatsAvl = seatno-1
-                });
-
-                await user.updateOne({$push:{eventsEnrolled: eventid}});
-
-                const mailbody=`You have successfully enrolled in ${event.name} scheduled on ${event.date}, here is your ticket ${ticket.QR}`;
-
-                await sendmail(user.email, "Payment Successfull", mailbody);
-
-            } catch(err){
-                return res.status(500).json({
-                    success:false,
-                    message:"Internal error after payment verifcation "+err
-                })
-            }
-        }else{
+        if (signature !== expectedSignature) {
             return res.status(401).json({
                 success: false,
-                message:"Payment is Not verified"
-            })
+                message: "Payment verification failed"
+            });
         }
 
+        console.log(" Payment verified");
 
-        res.status(200).json({
+        const { userid, eventid, ticketid } = req.body.payload.payment.entity.notes;
+
+        if (!userid || !eventid || !ticketid) {
+            return res.status(400).json({
+                success: false,
+                message: "Missing required info from Razorpay notes"
+            });
+        }
+
+        const event = await Event.findById(eventid);
+        const user = await User.findById(userid);
+
+        if (!event || !user) {
+            return res.status(404).json({
+                success: false,
+                message: "User or Event not found"
+            });
+        }
+
+        const ticket = await Ticket.findByIdAndUpdate(
+            ticketid,
+            {
+                $set: {
+                    noExpiry: true,
+                    seatNo: event.seatsAvl
+                }
+            },
+            { new: true }
+        );
+
+        await event.updateOne({
+            $push: { attendees: userid }
+        });
+
+        await user.updateOne({
+            $push: { eventsEnrolled: eventid }
+        });
+
+        const mailBody = ` You have successfully enrolled in *${event.name}* scheduled on *${event.date}*.\n\n🪪 Your ticket QR: ${ticket.QR}`;
+
+        await sendmail(user.email, "Payment Successful - Event Ticket", mailBody);
+
+        return res.status(200).json({
             success: true,
-            message:"Payment Verified and user enrolled successfully"
-        })
-    } catch(err){
-        res.status(500).json({
+            message: "Payment verified and user enrolled successfully"
+        });
+
+    } catch (err) {
+        return res.status(500).json({
             success: false,
-            message:"Interanl error in payment verification "+err
-        })
+            message: "Internal error during payment verification: " + err.message
+        });
     }
-}
+};
