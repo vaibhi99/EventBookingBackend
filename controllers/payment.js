@@ -165,9 +165,13 @@ exports.verifypayment = async (req, res) =>{
                     })         
                 }
 
+                console.log(user.firstName, event.name);
+                
                 const ticket = await Ticket.findByIdAndUpdate({ticketid}, {$set:{noExpiry:true},
                 $set: {seatNo:event.seatsAvl}}, {new: true});
 
+                console.log(ticket);
+                
                 await event.updateOne({
                     $push:{attendees: userid},
                     $set: seatsAvl = seatno-1
