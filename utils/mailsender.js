@@ -1,30 +1,22 @@
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 
 require("dotenv").config();
 
-const transporter = nodemailer.createTransport({
-    host: process.env.MAIL_HOST,
-    port: 465,
-    secure: true,
-    
-    auth:{
-        user: process.env.USER_EMAIL,
-        pass: process.env.USER_PASS
-    }
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-exports.sendmail = async (email, title, body) =>{
-    try{
-        const result = await transporter.sendMail({
-            from:`"Organizer" ${process.env.USER_EMAIL}`,
-            to:`${email}`,
+exports.sendmail = async (email, title, body) => {
+    try {
+        const result = await resend.emails.send({
+            from: "Event Booking <onboarding@resend.dev>",
+            to: email,
             subject: title,
             text: body
-        })
+        });
 
-        console.log("Mail sent successfully !");
+        console.log("Mail sent successfully !", result);
 
-    } catch(err){
+    } catch (err) {
         console.log("Some error occured while sending mail " + err);
+        throw err;
     }
 }
