@@ -71,6 +71,3 @@ A backend API for event booking, ticketing, payments, and user management.
 - `/api/comment` - Comments on events
 - `/api/rating_review` - Ratings and reviews
 
-## License
-
-MIT
